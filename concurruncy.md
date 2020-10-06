@@ -39,3 +39,76 @@ A thread is in this state once it has been created. Until it is actually running
 In this state, a thread might actually be running or it might be ready to run at any instant of time. It is the responsibility of the thread scheduler to assign CPU time to the thread.
 ### Blocked : 
 A thread might be in this state, when it is waiting for I/O operations to complete. When blocked, a thread cannot continue its execution any further until it is moved to the runnable state again. It will not consume any CPU time in this state. The thread scheduler is responsible for reactivating the thread.
+
+# Concurrency Support in C++11
+
+The concurrency support in C++ makes it possible for a program to execute multiple threads in parallel. Concurrency was first introduced into the standard with C++11. Since then, new concurrency features have been added with each new standard update, such as in C++14 and C++17. Before C++11, concurrent behavior had to be implemented using native concurrency support from the OS, using POSIX Threads, or third-party libraries such as BOOST. The standardization of concurrency in C++ now makes it possible to develop cross-platform concurrent programs, which is as significant improvement that saves time and reduces error proneness. Concurrency in C++ is provided by the thread support library, which can be accessed by including the header.
+
+A running program consists of at least one thread. When the main function is executed, we refer to it as the "main thread". Threads are uniquely identified by their thread ID, which can be particularly useful for debugging a program.
+
+```
+#include <iostream>
+#include <thread>
+
+int main()
+{
+    std::cout << "Hello concurrent world from main! Thread id = " << std::this_thread::get_id() << std::endl;
+
+    return 0;
+}
+
+```
+Also, it is possible to retrieve the number of available CPU cores of a system.
+
+```
+#include <iostream>
+#include <thread>
+
+int main()
+{
+    unsigned int nCores = std::thread::hardware_concurrency();
+    std::cout << "This machine supports concurrency with " << nCores << " cores available" << std::endl;
+
+    return 0;
+}
+
+```
+
+## Starting a second thread
+
+In this section, we will start a second thread in addition to the main thread of our program. To do this, we need to construct a thread object and pass it the function we want to be executed by the thread. Once the thread enters the runnable state, the execution of the associated thread function may start at any point in time.
+
+```
+ // create thread
+    std::thread t(threadFunction);
+```
+After the thread object has been constructed, the main thread will continue and execute the remaining instructions until it reaches the end and returns. It is possible that by this point in time, the thread will also have finished. But if this is not the case, the main program will terminate and the resources of the associated process will be freed by the OS. As the thread exists within the process, it can no longer access those resources and thus not finish its execution as intended.
+
+To prevent this from happening and have the main program wait for the thread to finish the execution of the thread function, we need to call join() on the thread object. This call will only return when the thread reaches the end of the thread function and block the main thread until then.
+
+```
+#include <iostream>
+#include <thread>
+
+void threadFunction()
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // simulate work
+    std::cout << "Finished work in thread\n"; 
+}
+
+int main()
+{
+    // create thread
+    std::thread t(threadFunction);
+
+    // do something in main()
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // simulate work
+    std::cout << "Finished work in main\n";
+
+    // wait for thread to finish
+    t.join();
+
+    return 0;
+}
+
+```
