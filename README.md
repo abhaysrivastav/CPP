@@ -1,4 +1,4 @@
-# C_plus_plus Modern
+# Modern CPP
 
 ### Partial Template Specialization
 
