@@ -331,3 +331,15 @@ Vehicle object has been created
 
 Vehicle object has been created 
 ```
+
+## Lambdas
+
+Another very useful way of starting a thread and passing information to it is by using a lambda expression ("Lambda" for short). With a Lambda you can easily create simple function objects.
+
+A Lambda is a function object (a "functor"), so it has a type and can be stored and passed around. Its result object is called a "closure", which can be called using the operator ().  
+
+A lambda formally consists of three parts: a capture list [] , a parameter list () and a main part {}, which contains the code to be executed when the Lambda is called.
+
+
+
+
