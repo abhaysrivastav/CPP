@@ -219,4 +219,115 @@ int main()
 }
 ```
 
+## Starting Threads with Function Objects
 
+The std::thread constructor can also be called with instances of classes that implement the function-call operator. In the following, we will thus define a class that has an overloaded ()-operator.
+
+```
+#include <iostream>
+#include <thread>
+
+class Vehicle
+{
+public:
+    void operator()()
+    {
+        std::cout << "Vehicle object has been created \n" << std::endl;
+    }
+};
+
+
+int main()
+{
+    // create thread 
+    std::thread t(Vehicle()); // C++'s most vexing parse
+
+    // do something in main()
+    std::cout << "Finished work in main \n";
+
+    // wait for thread to finish
+    t.join();
+
+    return 0;
+}
+
+```
+
+When executing this code, the clang++ compiler generates a warning, which is followed by an error:
+
+```
+root@1f24ea0451d0:/home/workspace# g++ example_1.cpp -pthread
+example_1.cpp: In function ‘int main()’:
+example_1.cpp:23:7: error: request for member ‘join’ in ‘t’, which is of non-class type ‘std::thread(Vehicle (*)())’
+     t.join();
+       ^~~
+```
+
+the line
+
+```
+std::thread t(Vehicle());
+
+```
+
+is seemingly ambiguous, since it could be interpreted either as
+
+1. a variable definition for variable t of class std::thread, initialized with an anonymous instance of class Vehicle or
+2. a function declaration for a function t that returns an object of type std::thread and has a single (unnamed) parameter that is a pointer to function returning an object of type Vehicle.
+
+Most programmers would presumable expect the first case to be true, but the C++ standard requires it to be interpreted as the second - hence the compiler warning.
+
+There are three ways of forcing the compiler to consider the line as the first case, which would create the thread object we want:
+
+1. Add an extra pair of parentheses
+2. Use copy initialization
+3. Use uniform initialization with braces
+
+```
+#include <iostream>
+#include <thread>
+
+class Vehicle
+{
+public:
+    void operator()()
+    {
+        std::cout << "Vehicle object has been created \n" << std::endl;
+    }
+};
+
+
+int main()
+{
+    // create thread 
+    //std::thread t0(Vehicle()); // C++'s most vexing parse
+    
+    std::thread t1( (Vehicle()) ); // Add an extra pair of parantheses
+    
+    std::thread t2 = std::thread( Vehicle() ); // Use copy initialization
+    
+    std::thread t3{ Vehicle() };// Use uniform initialization with braces
+
+    // do something in main()
+    std::cout << "Finished work in main \n";
+
+    // wait for thread to finish
+    t1.join();
+    t2.join();
+    t3.join();
+
+    return 0;
+}
+```
+Now the output is : 
+
+```
+root@1f24ea0451d0:/home/workspace# g++ example_2.cpp -pthread
+root@1f24ea0451d0:/home/workspace# ./a.out
+Finished work in main 
+Vehicle object has been created 
+
+Vehicle object has been created 
+
+Vehicle object has been created 
+```
