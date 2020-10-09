@@ -340,6 +340,131 @@ A Lambda is a function object (a "functor"), so it has a type and can be stored 
 
 A lambda formally consists of three parts: a capture list [] , a parameter list () and a main part {}, which contains the code to be executed when the Lambda is called.
 
+**The capture list []**: By default, variables outside of the enclosing {} around the main part of the Lambda can not be accessed. By adding a variable to the capture list however, it becomes available within the Lambda either as a copy or as a reference. The captured variables become a part of the Lambda.
+
+By default, variables in the capture block can not be modified within the Lambda. Using the keyword "mutable" allows to modify the parameters captured by copy, and to call their non-const member functions within the body of the Lambda. The following code examples show several ways of making the external variable "id" accessible within a Lambda.
+
+Even though we have been using Lambdas in the above example in various ways, it is important to note that a Lambda does not exist at runtime. The runtime effect of a Lambda is the generation of an object, which is known as closure. The difference between a Lambda and the corresponding closure is similar to the distinction between a class and an instance of the class. A class exists only in the source code while the objects created from it exist at runtime.
+
+We can use (a copy of) the closure (i.e. f0, f1, …) to execute the code within the Lambda at a position in our program different to the line where the function object was created.
+
+```
+#include <iostream>
+
+int main()
+{
+    // create lambdas
+    int id = 0; // Define an integer variable
+
+    //auto f0 = []() { std::cout << "ID = " << id << std::endl; }; // Error: 'id' cannot be accessed
+
+    id++;
+    auto f1 = [id]() { std::cout << "ID = " << id << std::endl; }; // OK, 'id' is captured by value
+
+    id++;
+    auto f2 = [&id]() { std::cout << "ID = " << id << std::endl; }; // OK, 'id' is captured by reference
+
+    //auto f3 = [id]() { std::cout << "ID = " << ++id << std::endl; }; // Error, 'id' may not be modified
+
+    auto f4 = [id]() mutable { std::cout << "ID = " << ++id << std::endl; }; // OK, 'id' may be modified
+
+    // execute lambdas
+    f1();
+    f2();
+    f4();
+
+    return 0;
+}
+```
+
+Output is :
+
+```
+root@0531b34a3a23:/home/workspace# ./a.out
+ID = 1
+ID = 2
+ID = 3
+
+```
+
+The parameter list () : The way parameters are passed to a Lambda is basically identical to calling a regular function.
+
+```
+#include <iostream>
+
+int main()
+{
+    int id = 0; // Define an integer variable
+
+    // create lambda
+    auto f = [](const int id) { std::cout << "ID = " << id << std::endl; }; // ID is passed as a parameter
+
+    // execute function object and pass the parameter
+    f(id);
+
+    return 0;
+}
+
+```
+
+Output is :
+
+```
+root@0531b34a3a23:/home/workspace# g++ example_5.cpp
+root@0531b34a3a23:/home/workspace# ./a.out
+ID = 0
+```
+
+**Another Example :**
+
+```
+#include <iostream>
+
+int main()
+{
+    int id = 0; // Define an integer variable
+
+    // capture by reference (immutable)
+    auto f0 = [&id]() { std::cout << "a) ID in Lambda = " << id << std::endl; }; // 0
+
+    // capture by value (mutable)
+    auto f1 = [id]() mutable { std::cout << "b) ID in Lambda = " << ++id << std::endl; }; // 1
+    f1(); // call the closure and execute the code witin the Lambda 1
+    std::cout << "c) ID in Main = " << id << std::endl; // 0
+
+    // capture by reference (mutable)
+    auto f2 = [&id]() mutable { std::cout << "d) ID in Lambda = " << ++id << std::endl; };
+    f2(); // 1
+    std::cout << "e) ID in Main = " << id << std::endl; // 1
+
+    // pass parameter 
+    auto f3 = [](const int id) { std::cout << "f) ID in Lambda = " << id << std::endl; };   // 2
+    f3(++id);
+
+    // observe the effect of capturing by reference at an earlier point in time
+    f0(); // 2
+
+    return 0;
+}
+```
+Output is :
+
+```
+root@0531b34a3a23:/home/workspace# g++ quiz.cpp 
+root@0531b34a3a23:/home/workspace# ./a.out
+b) ID in Lambda = 1
+c) ID in Main = 0
+d) ID in Lambda = 1
+e) ID in Main = 1
+f) ID in Lambda = 2
+a) ID in Lambda = 2
+
+```
+
+### Starting Threads with Lambdas
+
+
+
 
 
 
