@@ -510,4 +510,94 @@ a) ID in Thread (call-by-reference) = 1
 ```
 As you can see, the output in the main thread is generated first, at which point the variable ID has taken the value 1. Then, the call-by-value thread is executed with ID at a value of 0. Then, the call-by-reference thread is executed with ID at a value of 1. This illustrates the effect of passing a value by reference : when the data to which the reference refers changes before the thread is executed, those changes will be visible.
 
+## Starting a Thread with Variadic Templates and Member Functions
 
+### Passing Arguments using a Variadic Template
+
+In the previous section, we have seen that one way to pass arguments in to the thread function is to package them in a class using the function call operator. Even though this worked well, it would be very cumbersome to write a special class every time we need to pass data to a thread. We can also use a Lambda that captures the arguments and then calls the function. But there is a simpler way: The thread constructor may be called with a function and all its arguments. That is possible because the thread constructor is a variadic template that takes multiple arguments.
+
+
+Before C++11, classes and functions could only accept a fixed number of arguments, which had to be specified during the first declaration. With variadic templates it is possible to include any number of arguments of any type.
+
+```
+#include <iostream>
+#include <thread>
+#include <string>
+
+void printID(int id)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::cout << "ID = " << id << std::endl;
+    
+}
+
+void printIDAndName(int id, std::string name)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::cout << "ID = " << id << ", name = " << name << std::endl;
+}
+
+int main()
+{
+    int id = 0; // Define an integer variable
+
+    // starting threads using variadic templates
+    std::thread t1(printID, id); //0
+    std::thread t2(printIDAndName, ++id, "MyString");  // 1, MyString
+    std::thread t3(printIDAndName, ++id); // this procudes a compiler error //
+
+    // wait for threads before returning
+    t1.join();
+    t2.join();
+    //t3.join();
+
+
+    return 0;
+}
+```
+As seen in the code example above, a first thread object is constructed by passing it the function printID and an integer argument. Then, a second thread object is constructed with a function printIDAndName, which requires an integer and a string parameter. If only a single argument was provided to the thread when calling printIDAndName, a compiler error would occur (see std::thread t3 in the example).
+
+There is one more difference between calling a function directly and passing it to a thread: With the former, arguments may be passed by value, by reference or by using move semantics - depending on the signature of the function. When calling a function using a variadic template, the arguments are by default either moved or copied - depending on wether they are rvalues or lvalues. There are ways however which allow us to overwrite this behavior. If you want to move an lvalue for example, we can call std::move. In the following example, two threads are started, each with a different string as a parameter. With t1, the string name1 is copied by value, which allows us to print name1 even after join has been called. The second string name2 is passed to the thread function using move semantics, which means that it is not available any more after join has been called on t2.
+
+```
+#include <iostream>
+#include <thread>
+#include <string>
+
+void printName(std::string name, int waitTime)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    std::cout << "Name (from Thread) = " << name << std::endl;
+}
+
+int main()
+{
+    std::string name1 = "MyThread1";
+    std::string name2 = "MyThread2";
+
+    // starting threads using value-copy and move semantics 
+    std::thread t1(printName, name1, 50);
+    std::thread t2(printName, std::move(name2), 100);
+
+    // wait for threads before returning
+    t1.join();
+    t2.join();
+
+    // print name from main
+    std::cout << "Name (from Main) = " << name1 << std::endl;
+    std::cout << "Name (from Main) = " << name2 << std::endl;
+
+    return 0;
+}
+```
+
+The console output shows how using copy-by-value and std::move affect the string parameters:
+```
+root@4843225a1471:/home/workspace# g++ example_2.cpp -pthread
+root@4843225a1471:/home/workspace# ./a.out
+Name (from Thread) = MyThread1
+Name (from Thread) = MyThread2
+Name (from Main) = MyThread1
+Name (from Main) = 
+
+```
