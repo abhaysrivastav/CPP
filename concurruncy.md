@@ -741,3 +741,15 @@ root@e9374c69a377:/home/workspace# g++ example_5.cpp -pthread
 root@e9374c69a377:/home/workspace# ./a.out
 Vehicle ID=1
 ```
+
+## Running Multiple Threads
+
+### Fork-Join Parallelism
+
+Using threads follows a basic concept called "fork-join-parallelism". The basic mechanism of this concept follows a simple three-step pattern:
+
+1. Split the flow of execution into a parallel thread ("fork")
+2. Perform some work in both the main thread and the parallel thread
+3. Wait for the parallel thread to finish and unite the split flow of execution again ("join")
+
+![image](https://r845225c859889xjupyterllynna106.udacity-student-workspaces.com/files/images/C2-6-A2%20multithreading.jpg)
