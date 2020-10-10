@@ -601,3 +601,143 @@ Name (from Main) = MyThread1
 Name (from Main) = 
 
 ```
+In the following example, the signature of the thread function is modified to take a non-const reference to the string instead.
+
+
+```
+#include <iostream>
+#include <thread>
+#include <string>
+
+void printName(std::string &name, int waitTime)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    name += " (from Thread)";
+    std::cout << name << std::endl;
+}
+
+int main()
+{
+    std::string name("MyThread");
+
+    // starting thread
+    std::thread t(printName, std::ref(name), 50);
+
+    // wait for thread before returning
+    t.join();
+
+    // print name from main
+    name += " (from Main)";
+    std::cout << name << std::endl;
+
+    return 0;
+}
+```
+
+The output is :
+
+```
+root@e9374c69a377:/home/workspace# g++ example_3.cpp -pthread
+root@e9374c69a377:/home/workspace# ./a.out
+MyThread (from Thread)
+MyThread (from Thread) (from Main)
+
+```
+
+When passing the string variable name to the thread function, we need to explicitly mark it as a reference, so the compiler will treat it as such. This can be done by using the std::ref function. In the console output it becomes clear that the string has been successfully modified within the thread function before being passed to main.
+
+**JTD : We are now sharing mutable data between threads - which will be something we discuss in later sections of this course as a primary source for concurrency bugs.**
+
+## Starting Threads with Member Functions
+What if we wish to run a member function other than the function call operator, such as a member function of an existing object? Luckily, the C++ library can handle this use-case: For calling member functions, the std::thread function requires an additional argument for the object on which to invoke the member function.
+
+
+```
+#include <iostream>
+#include <thread>
+
+class Vehicle
+{
+public:
+    Vehicle() : _id(0) {}
+    void addID(int id) { _id = id; }
+    void printID()
+    {
+        std::cout << "Vehicle ID=" << _id << std::endl;
+    }
+
+private:
+    int _id;
+};
+
+int main()
+{
+    // create thread
+    Vehicle v1, v2;
+    std::thread t1 = std::thread(&Vehicle::addID, v1, 1); // call member function on object v
+    std::thread t2 = std::thread(&Vehicle::addID, &v2, 2); // call member function on object v
+
+    // wait for thread to finish
+    t1.join();
+    t2.join();
+
+    // print Vehicle id
+    v1.printID(); //0
+    v2.printID(); //2
+
+    return 0;
+}
+```
+n the example above, the Vehicle object v1 is passed to the thread function by value, thus a copy is made which does not affect the „original“ living in the main thread. Changes to its member variable _id will thus not show when printing calling printID() later in main. The second Vehicle object v2 is instead passed by reference. Therefore, changes to its _id variable will also be visible in the main thread - hence the following console output:
+
+```
+root@e9374c69a377:/home/workspace# g++ example_4.cpp -pthread
+root@e9374c69a377:/home/workspace# ./a.out
+Vehicle ID=0
+Vehicle ID=2
+
+```
+
+In the previous example, we have to ensure that the existence of v2 outlives the completion of the thread t2 - otherwise there will be an attempt to access an invalidated memory address. An alternative is to use a heap-allocated object and a reference-counted pointer such as std::shared_ptr<Vehicle> to ensure that the object lives as long as it takes the thread to finish its work. The following example shows how this can be implemented:
+
+```
+#include <iostream>
+#include <thread>
+
+class Vehicle
+{
+public:
+    Vehicle() : _id(0) {}
+    void addID(int id) { _id = id; }
+    void printID()
+    {
+        std::cout << "Vehicle ID=" << _id << std::endl;
+    }
+
+private:
+    int _id;
+};
+
+int main()
+{
+    // create thread
+    std::shared_ptr<Vehicle> v(new Vehicle);
+    std::thread t = std::thread(&Vehicle::addID, v, 1); // call member function on object v
+    
+    // wait for thread to finish
+    t.join();
+    
+    // print Vehicle id
+    v->printID();
+    
+    return 0;
+}
+
+```
+The output is 
+
+```
+root@e9374c69a377:/home/workspace# g++ example_5.cpp -pthread
+root@e9374c69a377:/home/workspace# ./a.out
+Vehicle ID=1
+```
