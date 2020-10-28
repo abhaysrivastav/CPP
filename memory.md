@@ -53,3 +53,6 @@ char *pStr=new char[25];
 delete[] pStr;
 strcpy(pStr, "Invalid Access");
 ```
+
+# Resource Copying Policy 
+
