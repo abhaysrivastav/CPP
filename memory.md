@@ -58,6 +58,101 @@ strcpy(pStr, "Invalid Access");
 
 he default behavior of both copy constructor and assignment operator is to perform a shallow copy as with the example above. The following figure illustrates the concept:
 
-![image](https://r859981c931118xjupyterlcavzqg6q.udacity-student-workspaces.com/files/images/C41-FIG1.png?_xsrf=2%7C97dfdc98%7C484e13c6cd07379a6045fa618dc43e09%7C1603897224&1603948489838)
+![image](https://r859981c931118xjupyterlcavzqg6q.udacity-student-workspaces.com/files/images/C41-FIG1.png_xsrf=2%7C97dfdc98%7C484e13c6cd07379a6045fa618dc43e09%7C1603897224&1603948489838)
 
 Fortunately, in C++, the copying process can be controlled by defining a tailored copy constructor as well as a copy assignment operator. The copying process must be closely linked to the respective resource release mechanism and is often referred to as copy-ownership policy. Tailoring the copy constructor according to your memory management policy is an important choice you often need to make when designing a class. In the following, we will closely examine several well-known copy-ownership policies.
+
+## No copying policy
+
+The simplest policy of all is to forbid copying and assigning class instances all together. This can be achieved by declaring, but not defining a private copy constructor and assignment operator (see NoCopyClass1 below) or alternatively by making both public and assigning the delete operator (see NoCopyClass2 below). The second choice is more explicit and makes it clearer to the programmer that copying has been actively forbidden.
+
+```
+class NoCopyClass1
+{
+private:
+    // Declared as private in the class but not defined, actually its disallowing the copy and assigning
+    NoCopyClass1(const NoCopyClass1 &); 
+    NoCopyClass1 &operator=(const NoCopyClass1 &);
+
+public:
+    NoCopyClass1(){};
+};
+
+class NoCopyClass2
+{
+public:
+    NoCopyClass2(){}
+    NoCopyClass2(const NoCopyClass2 &) = delete;
+    NoCopyClass2 &operator=(const NoCopyClass2 &) = delete;
+};
+
+int main()
+{
+    NoCopyClass1 original1;
+    NoCopyClass1 copy1a(original1); // copy c’tor
+    NoCopyClass1 copy1b = original1; // assigment operator
+
+    NoCopyClass2 original2;
+    NoCopyClass2 copy2a(original2); // copy c’tor
+    NoCopyClass2 copy2b = original2; // assigment operator
+
+    return 0;
+}
+```
+
+##  Exclusive ownership policy
+
+This policy states that whenever a resource management object is copied, the resource handle is transferred from the source pointer to the destination pointer. In the process, the source pointer is set to nullptr to make ownership exclusive. At any time, the resource handle belongs only to a single object, which is responsible for its deletion when it is no longer needed.
+
+```
+#include <iostream>
+
+class ExclusiveCopy
+{
+private:
+    int *_myInt;
+
+public:
+    ExclusiveCopy()
+    {
+        _myInt = (int *)malloc(sizeof(int));
+        std::cout << "resource allocated" << std::endl;
+    }
+    ~ExclusiveCopy()
+    {
+        if (_myInt != nullptr)
+        {
+            free(_myInt);
+            std::cout << "resource freed" << std::endl;
+        }
+            
+    }
+    ExclusiveCopy(ExclusiveCopy &source)
+    {
+        _myInt = source._myInt;
+        source._myInt = nullptr;
+    }
+    ExclusiveCopy &operator=(ExclusiveCopy &source)
+    {
+        _myInt = source._myInt;
+        source._myInt = nullptr;
+        return *this;
+    }
+};
+
+int main()
+{
+    ExclusiveCopy source;
+    ExclusiveCopy destination(source);
+
+    return 0;
+}
+```
+
+The output is :
+```
+root@4a8772811e00:/home/workspace# g++ exclusive_ownership.cpp 
+root@4a8772811e00:/home/workspace# ./a.out
+resource allocated
+resource freed
+```
