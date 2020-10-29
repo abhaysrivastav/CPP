@@ -58,8 +58,6 @@ strcpy(pStr, "Invalid Access");
 
 he default behavior of both copy constructor and assignment operator is to perform a shallow copy as with the example above. The following figure illustrates the concept:
 
-![image](https://r859981c931118xjupyterlcavzqg6q.udacity-student-workspaces.com/files/images/C41-FIG1.png_xsrf=2%7C97dfdc98%7C484e13c6cd07379a6045fa618dc43e09%7C1603897224&1603948489838)
-
 Fortunately, in C++, the copying process can be controlled by defining a tailored copy constructor as well as a copy assignment operator. The copying process must be closely linked to the respective resource release mechanism and is often referred to as copy-ownership policy. Tailoring the copy constructor according to your memory management policy is an important choice you often need to make when designing a class. In the following, we will closely examine several well-known copy-ownership policies.
 
 ## No copying policy
