@@ -154,3 +154,11 @@ root@4a8772811e00:/home/workspace# ./a.out
 resource allocated
 resource freed
 ```
+
+ One problem in this implementation is that for a short time there are effectively two valid handles to the same resource - after the handle has been copied and before it is set to nullptr. In concurrent programs, this would cause a data race for the resource. A much better alternative to handle exclusive ownership in C++ would be to use move semantics.
+ 
+ ## Deep Copying Policy
+
+With this policy, copying and assigning class instances to each other is possible without the **danger of resource conflicts**. The idea is to allocate proprietary memory in the destination object and then to copy the content to which the source object handle is pointing into the newly allocated block of memory. This way, the content is preserved during copy or assignment. However, this approach increases the memory demands and the uniqueness of the data is lost: After the deep copy has been made, two versions of the same resource exist in memory.
+
+![deepcopy](https://r859981c931118xjupyterlcavzqg6q.udacity-student-workspaces.com/files/images/C41-FIG2.png?_xsrf=2%7C97dfdc98%7C484e13c6cd07379a6045fa618dc43e09%7C1603897224&1604065053065)
