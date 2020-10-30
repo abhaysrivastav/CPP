@@ -164,3 +164,28 @@ With this policy, copying and assigning class instances to each other is possibl
 ## Shared ownership policy
 
 The last ownership policy we will be discussing in this course implements a shared ownership behavior. The idea is to perform a copy or assignment similar to the default behavior, i.e. copying the handle instead of the content (as with a shallow copy) while at the same time keeping track of the number of instances that also point to the same resource. Each time an instance goes out of scope, the counter is decremented. Once the last object is about to be deleted, it can safely deallocate the memory resource. We will see later in this course that this is the central idea of unique_ptr, which is a representative of the group of smart pointers.
+
+## What are lvalues and rvalues ? 
+
+Lvalues have an address that can be accessed. They are expressions whose evaluation by the compiler determines the identity of objects or functions.
+
+Prvalues do not have an address that is accessible directly. They are temporary expressions used to initialize objects or compute the value of the operand of an operator.
+
+```
+int i = 42;  // lvalue = rvalue;
+```
+
+With many other operators, however, this right-left view is not entirely correct. In more general terms, an lvalue is an entity that points to a specific memory location. An rvalue is usually a short-lived object, which is only needed in a narrow local scope. To simplify things a little, one could think of lvalues as named containers for rvalues.
+
+In the example above, the value 42 is an rvalue. It does not have a specific memory address which we know about. The rvalue is assigned to a variable i with a specific memory location known to us, which is what makes it an lvalue in this example.
+
+Using the address operator & we can generate an lvalue from an rvalue and assign it to another lvalue:
+
+```
+int *j = &i;
+```
+
+In this small example, the expression &i generates the address of i as an rvalue and assigns it to j, which is an lvalue now holding the memory location of i.
+
+### Lvalue references
+
