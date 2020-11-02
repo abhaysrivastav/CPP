@@ -288,3 +288,100 @@ myFunction(std::move(i));
 
 ### The Rule Of Three
 
+The rule of three (also known as the Law of The Big Three or The Big Three) is a rule of thumb in C++ (prior to C++11) that claims that if a class defines any of the following then it should probably explicitly define all three: 
+
+ - destructor
+ - copy constructor
+ - copy assignment operator
+
+Note that when a function returns an object by value, the compiler creates a temporary object as an rvalue. 
+
+```
+#include <stdlib.h>
+#include <iostream>
+
+class MyMovableClass
+{
+private:
+    int _size;
+    int *_data;
+
+public:
+    MyMovableClass(size_t size) // constructor
+    {
+        _size = size;
+        _data = new int[_size];
+        std::cout << "CREATING instance of MyMovableClass at " << this << " allocated with size = " << _size*sizeof(int)  << " bytes" << std::endl;
+    }
+
+    MyMovableClass(const MyMovableClass &source) // 2 : copy constructor
+    {
+        _size = source._size;
+        _data = new int[_size];
+        *_data = *source._data;
+        std::cout << "COPYING content of instance " << &source << " to instance " << this << std::endl;
+    }
+    
+    MyMovableClass &operator=(const MyMovableClass &source) // 3 : copy assignment operator
+    {
+        std::cout << "ASSIGNING content of instance " << &source << " to instance " << this << std::endl;
+        if (this == &source)
+            return *this;
+        delete[] _data;
+        _data = new int[source._size];
+        *_data = *source._data;
+        _size = source._size;
+        return *this;
+    }
+    
+    ~MyMovableClass() // 1 : destructor
+    {
+        std::cout << "DELETING instance of MyMovableClass at " << this << std::endl;
+        delete[] _data;
+    }
+};
+
+MyMovableClass createObject(int size)
+{
+    MyMovableClass obj(size);
+    return obj; // return MyMovableClass object as value
+}
+int main()
+{
+    MyMovableClass obj1(10); // Regular Constructor
+    MyMovableClass obj2(obj1); // Copy Constructor
+    obj2 = obj1;
+    
+    MyMovableClass obj3 = obj1;
+    // Here we are instantiating obj3 in the same statement , hence the copy assignment operator would not be called
+    
+    MyMovableClass obj4 = createObject(10);
+    // 
+    
+    return 0;  
+    
+}
+```
+and the output is :
+```
+root@178daecdc2cc:/home/workspace# g++ rule_of_three.cpp 
+root@178daecdc2cc:/home/workspace# ./a.out
+CREATING instance of MyMovableClass at 0x7ffca33b7e00 allocated with size = 40 bytes
+COPYING content of instance 0x7ffca33b7e00 to instance 0x7ffca33b7e10
+ASSIGNING content of instance 0x7ffca33b7e00 to instance 0x7ffca33b7e10
+COPYING content of instance 0x7ffca33b7e00 to instance 0x7ffca33b7e20
+CREATING instance of MyMovableClass at 0x7ffca33b7e30 allocated with size = 40 bytes
+DELETING instance of MyMovableClass at 0x7ffca33b7e30
+DELETING instance of MyMovableClass at 0x7ffca33b7e20
+DELETING instance of MyMovableClass at 0x7ffca33b7e10
+DELETING instance of MyMovableClass at 0x7ffca33b7e00
+```
+
+In below case :
+
+```
+MyMovableClass obj4 = createObject(10);
+```
+
+The function ``` createobject(10)``` returns an instance of MyMovableClass by value. In such a case, compiler creates a temporary copy of the object as an ravalue, which is passed to the copy constructor. The problem here is 2 expensive memory operation are performed. First occuring during the creation of temporary rvalue and second during the execution of copy constructor.  
+
