@@ -189,3 +189,35 @@ In this small example, the expression &i generates the address of i as an rvalue
 
 ### Lvalue references
 
+An lvalue reference can be considered as alternative name of an object. It is a reference that binds to an lvalue and is declared using an optional list of specifiers by reference declarator &. 
+
+```
+#include <iostream>
+
+int main()
+{
+    int i = 1; 
+    int &j = i; 
+    ++i;
+    ++j;
+
+    std::cout << "i = " << i << ", j = " << j << std::endl;
+
+    return 0;
+}
+```
+
+The output of the program is 
+```
+i = 3, j = 3
+```
+
+We can see that the lvalue reference j can be used just as i can. A change to either i or j will affect the same memory location on the stack.
+
+One of the primary use case for lvalue refernce is the pass-by-reference semantics in function call. 
+
+The function myFunction has an lvalue reference as a parameter, which establishes an alias to the integer i which is passed to it in main.
+
+### Rvalue references
+
+
