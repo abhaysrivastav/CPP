@@ -385,3 +385,6 @@ MyMovableClass obj4 = createObject(10);
 
 The function ``` createobject(10)``` returns an instance of MyMovableClass by value. In such a case, compiler creates a temporary copy of the object as an ravalue, which is passed to the copy constructor. The problem here is 2 expensive memory operation are performed. First occuring during the creation of temporary rvalue and second during the execution of copy constructor.  
 
+The efficient way to return the large data structure by value, is move constructor and Rule of five. 
+
+
