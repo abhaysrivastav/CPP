@@ -387,4 +387,6 @@ The function ``` createobject(10)``` returns an instance of MyMovableClass by va
 
 The efficient way to return the large data structure by value, is move constructor and Rule of five. 
 
+### The move constructor
 
+![](https://r859981c931022xjupyterl6mp1rmbe.udacity-student-workspaces.com/files/images/C43-FIG1.png?_xsrf=2%7C7c81615f%7C77194bb5ed8f85083c52f6d7cf9d61ea%7C1604641454&1604641462805)
