@@ -390,3 +390,80 @@ The efficient way to return the large data structure by value, is move construct
 ### The move constructor
 
 ![](https://r859981c931022xjupyterl6mp1rmbe.udacity-student-workspaces.com/files/images/C43-FIG1.png_xsrf=2%7C7c81615f%7C77194bb5ed8f85083c52f6d7cf9d61ea%7C1604641454&1604641462805)
+
+Just like the copy constructor, the move constructor builds an instance of a class using a source instance. The key difference between the two is that with the move constructor, the source instance will no longer be usable afterwards.
+
+```
+    MyMovableClass(MyMovableClass &&source) // 4 : move constructor
+    {
+        std::cout << "MOVING (c’tor) instance " << &source << " to instance " << this << std::endl;
+        _data = source._data;
+        _size = source._size;
+        source._data = nullptr;
+        source._size = 0;
+    }
+```
+
+As can be seen, the implementation copies the data handle from source to target and immediately invalidates source after copying is complete. Now, this is responsible for the data and must also release memory on destruction - the ownership has been successfully changed (or moved) without the need to copy the data on the heap.
+
+The move assignment operator works in a similar way:
+
+```
+    MyMovableClass &operator=(MyMovableClass &&source) // 5 : move assignment operator
+    {
+        std::cout << "MOVING (assign) instance " << &source << " to instance " << this << std::endl;
+        if (this == &source)
+            return *this;
+
+        delete[] _data;
+
+        _data = source._data;
+        _size = source._size;
+
+        source._data = nullptr;
+        source._size = 0;
+
+        return *this;
+    }
+```
+As with the move constructor, the data handle is copied from source to target which is coming in as an rvalue reference again. Afterwards, the data members of source are invalidated. The rest of the code is identical with the copy constructor we have already implemented.
+
+### The Rule Of Five
+
+The Rule of Five is especially important in resource management, where unnecessary copying needs to be avoided due to limited resources and performance reasons. Also, all the STL container classes such as std::vector implement the Rule of Five and use move semantics for increased efficiency.
+
+The Rule of Five states that if you have to write one of the functions listed below then you should consider implementing all of them with a proper resource management policy in place. If you forget to implement one or more, the compiler will usually generate the missing ones (without a warning) but the default versions might not be suitable for the purpose you have in mind. The five functions are:
+
+### The destructor: 
+Responsible for freeing the resource once the object it belongs to goes out of scope.
+
+### The assignment operator: 
+The default assignment operation performs a member-wise shallow copy, which does not copy the content behind the resource handle. If a deep copy is needed, it has be implemented by the programmer.
+
+### The copy constructor: 
+As with the assignment operator, the default copy constructor performs a shallow copy of the data members. If something else is needed, the programmer has to implement it accordingly.
+
+### The move constructor: 
+Because copying objects can be an expensive operation which involves creating, copying and destroying temporary objects, rvalue references are used to bind to an rvalue. Using this mechanism, the move constructor transfers the ownership of a resource from a (temporary) rvalue object to a permanent lvalue object.
+
+### The move assignment operator:
+With this operator, ownership of a resource can be transferred from one object to another. The internal behavior is very similar to the move constructor.
+
+## When are move semantics used?
+
+One of the primary areas of application are cases, where heavy-weight objects need to be passed around in a program. Copying these without move semantics can cause series performance issues. The idea in this scenario is to create the object a single time and then "simply" move it around using rvalue references and move semantics.
+A second area of application are cases where ownership needs to be transferred.
+
+### Moving lvalues
+std::move. This function accepts an lvalue argument and returns it as an rvalue without triggering copy construction. So by passing an object to std::move we can force the compiler to use move semantics, either in the form of move constructor or the move assignment operator:
+
+```
+int main()
+{
+    MyMovableClass obj1(100); // constructor
+
+    useObject(std::move(obj1));
+
+    return 0;
+}
+```
