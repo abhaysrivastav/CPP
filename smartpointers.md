@@ -41,7 +41,7 @@ C++11 has introduced three types of smart pointers, which are defined in the hea
 
 ## The Unique pointer
 
-![Unique Ownership](https://r859981c931308xjupyterlqe3a4k79.udacity-student-workspaces.com/files/images/C52-FIG1.png?_xsrf=2%7C629a40f4%7C4c56f2c867a6f7aef2001b1e43366403%7C1604664472&1604669934062)
+![Unique Ownership](https://raw.githubusercontent.com/abhaysrivastav/CPP/master/docs/C52-FIG1.png)
 
 The function RawPointer contains the familiar steps of (1) allocating memory on the heap with new and storing the address in a pointer variable, (2) assigning a value to the memory block using the dereferencing operator * and (3) finally deleting the resource on the heap. As we already know, forgetting to call delete will result in a memory leak.
 
