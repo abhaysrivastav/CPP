@@ -121,3 +121,5 @@ class MyClass has two constructors, one without arguments and one with a string 
 ### The Shared Pointer 
 
 Just as the unique pointer, a shared pointer owns the resource it points to. The main difference between the two smart pointers is that shared pointers keep a reference counter on how many of them point to the same memory resource. Each time a shared pointer goes out of scope, the counter is decreased. When it reaches zero (i.e. when the last shared pointer to the resource is about to vanish). the memory is properly deallocated. This smart pointer type is useful for cases where you require access to a memory location on the heap in multiple parts of your program and you want to make sure that whoever owns a shared pointer to the memory can rely on the fact that it will be accessible throughout the lifetime of that pointer.
+
+![Shared Pointers](https://raw.githubusercontent.com/abhaysrivastav/CPP/master/docs/C52-FIG2.png)
