@@ -5,6 +5,7 @@
   - Memory ownership.
   
   ## Resource Acquisition Is Initialization
+  
   The RAII is a widespread programming paradigm, that can be used to protect a resource such as a file stream, a network connection or a block of memory which need proper management.
   
   ### The problem of reliable resource release
@@ -123,3 +124,97 @@ class MyClass has two constructors, one without arguments and one with a string 
 Just as the unique pointer, a shared pointer owns the resource it points to. The main difference between the two smart pointers is that shared pointers keep a reference counter on how many of them point to the same memory resource. Each time a shared pointer goes out of scope, the counter is decreased. When it reaches zero (i.e. when the last shared pointer to the resource is about to vanish). the memory is properly deallocated. This smart pointer type is useful for cases where you require access to a memory location on the heap in multiple parts of your program and you want to make sure that whoever owns a shared pointer to the memory can rely on the fact that it will be accessible throughout the lifetime of that pointer.
 
 ![Shared Pointers](https://raw.githubusercontent.com/abhaysrivastav/CPP/master/docs/C52-FIG2.png)
+
+
+A shared pointer can also be redirected by using the reset() function. 
+
+### Problem with Shared Pointer : Circular Reference 
+
+```
+#include <iostream>
+#include <memory>
+
+class MyClass
+{
+public:
+    std::shared_ptr<MyClass> _member;
+    ~MyClass() { std::cout << "Destructor of MyClass called" << std::endl; }
+};
+
+int main()
+{
+    std::shared_ptr<MyClass> myClass1(new MyClass);
+    std::shared_ptr<MyClass> myClass2(new MyClass);
+    
+    myClass1->_member = myClass2;
+    myClass2->_member = myClass1;
+    
+    std::cout << "myClass1 use Count test: " << myClass1.use_count() << std::endl;
+     std::cout << "myClass2 use Count test: " << myClass2.use_count() << std::endl;
+    return 0;
+}
+```
+
+ When myClass1 goes out of scope at the end of main, its destructor can’t clean up memory as there is still a reference count of 1 in the smart pointer, which is caused by the shared pointer _member in myClass2. The same holds true for myClass2, which can not be properly deleted as there is still a shared pointer to it in myClass1.
+ 
+ ## The Weak Pointer
+ 
+Similar to shared pointers, there can be multiple weak pointers to the same resource. The main difference though is that weak pointers do not increase the reference count. Weak pointers hold a non-owning reference to an object that is managed by another shared pointer.
+
+The following rule applies to weak pointers: You can only create weak pointers out of shared pointers or out of another weak pointer. The code on the right shows a few examples of how to use and how not to use weak pointers.
+
+```
+#include <iostream>
+#include <memory>
+
+int main()
+{
+    std::shared_ptr<int> mySharedPtr(new int);
+    std::cout << "shared pointer count = " << mySharedPtr.use_count() << std::endl;
+
+    std::weak_ptr<int> myWeakPtr1(mySharedPtr);
+    std::weak_ptr<int> myWeakPtr2(myWeakPtr1);
+    std::cout << "shared pointer count = " << mySharedPtr.use_count() << std::endl;
+
+    // std::weak_ptr<int> myWeakPtr3(new int); // COMPILE ERROR
+
+    return 0;
+}
+```
+
+The output is 
+
+```
+root@d59618d2fedc:/home/workspace# g++ weak_pointer.cpp 
+root@d59618d2fedc:/home/workspace# ./a.out 
+shared pointer count = 1
+shared pointer count = 1
+```
+
+ ## Conversion between Smart Pointers 
+ 
+ Lets consider 
+ 
+ ```
+  std::unique_ptr<int> uniquePtr(new int);
+ ```
+ 
+ A conversion from unique pointer to shared pointer can be  performed. You can see that this can be achieved by using std::move, which calls the move assignment operator on sharedPtr1 and steals the resource from uniquePtr while at the same time invalidating its resource handle on the heap-allocated integer.
+ 
+ ```
+ std::shared_ptr<int> sharedPtr1 = std::move(uniquePtr);
+ ```
+Imagine that you have been passed a weak pointer to a memory object which you want to work on. To avoid invalid memory access, you want to make sure that the object will not be deallocated before your work on it has been finished. To do this, you can convert a weak pointer to a shared pointer by calling the lock() function on the weak pointer.
+
+```
+    // (2) shared pointer from weak pointer
+    std::weak_ptr<int> weakPtr(sharedPtr1);
+    std::shared_ptr<int> sharedPtr2 = weakPtr.lock();
+```
+
+A raw pointer can be extracted from a shared pointer. However, this operation does not decrease the reference count within sharedPtr2. This means that calling delete on rawPtr in the last line before main returns will generate a runtime error as a resource is trying to be deleted which is managed by sharedPtr2 and has already been removed.
+
+```
+int *rawPtr = sharedPtr2.get();
+```
+**no options for converting away from a shared pointer**
