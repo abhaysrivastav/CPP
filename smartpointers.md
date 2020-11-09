@@ -66,3 +66,58 @@ void UniquePointer()
     // delete is not neccessary
 }
 ```
+
+### Unique Pointers Example
+
+```
+#include <iostream>
+#include <memory>
+#include <string>
+
+class MyClass
+{
+private:
+    std::string _text;
+
+public:
+    MyClass() {}
+    MyClass(std::string text) { _text = text; }
+    ~MyClass() { std::cout << _text << " destroyed" << std::endl; }
+    void setText(std::string text) { _text = text; }
+};
+
+int main()
+{
+    // create unique pointer to proprietary class
+    std::unique_ptr<MyClass> myClass1(new MyClass());
+    std::unique_ptr<MyClass> myClass2(new MyClass("String 2"));
+
+    // call member function using ->
+    myClass1->setText("String 1");
+
+    // use the dereference operator * 
+    //*myClass1 = *myClass2;
+
+    // use the .get() function to retrieve a raw pointer to the object
+    std::cout << "Objects have stack addresses " << myClass1.get() << " and " << myClass2.get() << std::endl;
+
+    return 0;
+}
+```
+
+The output is :
+```
+root@d59618d2fedc:/home/workspace# g++ unique_pointer_2.cpp 
+root@d59618d2fedc:/home/workspace# ./a.out 
+Objects have stack addresses 0x1cf9c20 and 0x1cf9c50
+String 2 destroyed
+String 1 destroyed
+```
+
+class MyClass has two constructors, one without arguments and one with a string to be passed, which initializes a member variable _text that lives on the stack. Also, once an object of this class gets destroyed, a message to the console is printed, along with the value of _text. In main, two unique pointers are created with the address of a MyClass object on the heap as arguments. With myClass2, we can see that constructor arguments can be passed just as we would with raw pointers. After both pointers have been created, we can use the -> operator to access members of the class, such as calling the function setText. From looking at the function call alone you would not be able to tell that myClass1 is in fact a smart pointer. Also, we can use the dereference operator * to access the value of myClass1 and myClass2 and assign the one to the other. Finally, the . operator gives us access to proprietary functions of the smart pointer, such as retrieving the internal raw pointer with get().
+
+**The Unique Pointer allow a single owner of the underlying internal raw pointer. Unique Pointer should be default choice unless you know for certain that sharing is required at later stage.** 
+
+### The Shared Pointer 
+
+Just as the unique pointer, a shared pointer owns the resource it points to. The main difference between the two smart pointers is that shared pointers keep a reference counter on how many of them point to the same memory resource. Each time a shared pointer goes out of scope, the counter is decreased. When it reaches zero (i.e. when the last shared pointer to the resource is about to vanish). the memory is properly deallocated. This smart pointer type is useful for cases where you require access to a memory location on the heap in multiple parts of your program and you want to make sure that whoever owns a shared pointer to the memory can rely on the fact that it will be accessible throughout the lifetime of that pointer.
