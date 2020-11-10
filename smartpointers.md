@@ -218,3 +218,125 @@ A raw pointer can be extracted from a shared pointer. However, this operation do
 int *rawPtr = sharedPtr2.get();
 ```
 **no options for converting away from a shared pointer**
+
+## Passing smart pointers to function 
+
+### R.30 Take smart pointers as parameters only to explicitly express lifetime semantics 
+
+ A function that does not manipulate the lifetime or ownership should use raw pointers or references instead. A function should take smart pointers as parameter only if it examines or manipulates the smart pointer itself.
+ 
+ **pass-by-value types that lend the ownership**
+```
+ 1. void f(std::unique_ptr<MyObject> ptr)
+
+ 2. void f(std::shared_ptr<MyObject> ptr)
+
+ 3. void f(std::weak_ptr<MyObject> ptr)
+ ```
+ 
+ ```
+ #include <iostream>
+#include <memory>
+
+class MyClass
+{
+private:
+    int _member;
+
+public:
+    MyClass(int val) : _member{val} {}
+    void printVal() { std::cout << ", managed object " << this << " with val = " << _member << std::endl; }
+};
+
+void f(std::unique_ptr<MyClass> ptr)
+{
+    std::cout << "unique_ptr from f " << &ptr;
+    ptr->printVal();
+}
+
+int main()
+{
+    std::unique_ptr<MyClass> uniquePtr = std::make_unique<MyClass>(23);
+    std::cout << "unique_ptr " << &uniquePtr;
+    uniquePtr->printVal();
+
+    f(std::move(uniquePtr));
+
+    if (uniquePtr)
+        uniquePtr->printVal();
+
+    return 0;
+}
+
+```
+
+And the output is :
+
+```
+root@7568250c71b3:/home/workspace# g++ r_32.cpp 
+root@7568250c71b3:/home/workspace# ./a.out 
+unique_ptr 0x7ffea90f3328, managed object 0xdc9c20 with val = 23
+unique_ptr from f 0x7ffea90f3330, managed object 0xdc9c20 with val = 23
+```
+he class MyClass has a private object _member and a public function printVal() which prints the address of the managed object (this) as well as the member value to the console. In main, an instance of MyClass is created by the factory function make_unique() and assigned to a unique pointer instance uniquePtr for management. Then, the pointer instance is moved into the function f using move semantics. As we have not overloaded the move constructor or move assignment operator in MyClass, the compiler is using the default implementation. In f, the address of the copied / moved unique pointer ptr is printed and the function printVal() is called on it. When the path of execution returns to main(), the program checks for the validity of uniquePtr and, if valid, calls the function printVal() on it again.
+
+### R.34: Take a shared_ptr parameter to express that a function is part owner
+
+```
+#include <iostream>
+#include <memory>
+
+class MyClass
+{
+private:
+    int _member;
+
+public:
+    MyClass(int val) : _member{val} {}
+    void printVal() { std::cout << ", managed object " << this << " with val = " << _member << std::endl; }
+};
+
+void f(std::shared_ptr<MyClass> ptr)
+{
+    std::cout << "shared_ptr (ref_cnt= " << ptr.use_count() << ") " << &ptr;
+    ptr->printVal();
+}
+
+int main()
+{
+    std::shared_ptr<MyClass> sharedPtr = std::make_shared<MyClass>(23);
+    std::cout << "shared_ptr (ref_cnt= " << sharedPtr.use_count() << ") " << &sharedPtr;
+    sharedPtr->printVal();
+
+    f(sharedPtr);
+
+    std::cout << "shared_ptr (ref_cnt= " << sharedPtr.use_count() << ") " << &sharedPtr;
+    sharedPtr->printVal();
+
+    return 0;
+}
+```
+
+The output is :
+
+```
+root@7568250c71b3:/home/workspace# g++ r_34.cpp 
+root@7568250c71b3:/home/workspace# ./a.out 
+shared_ptr (ref_cnt= 1) 0x7ffc65522d50, managed object 0x964c30 with val = 23
+shared_ptr (ref_cnt= 2) 0x7ffc65522d60, managed object 0x964c30 with val = 23
+shared_ptr (ref_cnt= 1) 0x7ffc65522d50, managed object 0x964c30 with val = 23
+```
+
+### R.33: Take a unique_ptr& parameter to express that a function reseats the widget
+
+and
+
+### R.35: Take a shared_ptr& parameter to express that a function might reseat the shared pointer
+
+Smart pointers should always be returned by value. This is not only simpler but also has the following advantages:
+
+The overhead usually associated with return-by-value due to the expensive copying process is significantly mitigated by the built-in move semantics of smart pointers. They only hold a reference to the managed object, which is quickly switched from destination to source during the move process.
+
+Since C++17, the compiler used Return Value Optimization (RVO) to avoid the copy usually associated with return-by-value. This technique, together with copy-elision, is able to optimize even move semantics and smart pointers (not in call cases though, they are still an essential part of modern C++).
+
+When returning a shared_ptr by value, the internal reference counter is guaranteed to be properly incremented. This is not the case when returning by pointer or by reference.
