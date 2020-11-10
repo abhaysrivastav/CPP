@@ -4,16 +4,14 @@
   - Correct operator pairing. 
   - Memory ownership.
   
-  ## Resource Acquisition Is Initialization
+  ### Resource Acquisition Is Initialization
   
-  The RAII is a widespread programming paradigm, that can be used to protect a resource such as a file stream, a network connection or a block of memory which need proper management.
+  The RAII is a widespread programming paradigm, that can be used to protect a resource such as a file stream, a network connection or a block of memory which need proper         management.
   
   ### The problem of reliable resource release
   
  - The program might throw an exception during resource use and thus the point of release might never be reached.
-
  - There might be several points where the resource could potentially be released, making it hard for a programmer to keep track of all eventualities.
-
  - We might simply forget to release the resource again.
   
 The major idea of RAII revolves around object ownership and information hiding: Allocation and deallocation are hidden within the management class, so a programmer using the class does not have to worry about memory management responsibilities. If he has not directly allocated a resource, he will not need to directly deallocate it - whoever owns a resource deals with it. In the case of RAII this is the management class around the protected resource. The overall goal is to have allocation and deallocation (e.g. with new and delete) disappear from the surface level of the code you write.
