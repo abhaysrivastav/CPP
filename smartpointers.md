@@ -339,4 +339,4 @@ The overhead usually associated with return-by-value due to the expensive copyin
 
 Since C++17, the compiler used Return Value Optimization (RVO) to avoid the copy usually associated with return-by-value. This technique, together with copy-elision, is able to optimize even move semantics and smart pointers (not in call cases though, they are still an essential part of modern C++).
 
-When returning a shared_ptr by value, the internal reference counter is guaranteed to be properly incremented. This is not the case when returning by pointer or by reference.
+When returning a shared_ptr by value, the internal reference counter is guaranteed to be properly incremented. This is not the case when returning by pointer or by reference .
