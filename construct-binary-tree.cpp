@@ -9,6 +9,22 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
+// Helper function to print inorder traversal (for verification)
+void printInorder(TreeNode* root) {
+    if (!root) return;
+    printInorder(root->left);
+    cout << root->val << " ";
+    printInorder(root->right);
+}
+
+// Helper function to print preorder traversal (for verification)
+void printPreorder(TreeNode* root) {
+    if (!root) return;
+    cout << root->val << " ";
+    printPreorder(root->left);
+    printPreorder(root->right);
+}
+
 class Solution {
 public:
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
@@ -61,7 +77,34 @@ int main() {
     vector<int> inorder1 = {9,3,15,20,7};
     
     TreeNode* root1 = sol.buildTree(preorder1, inorder1);
-    // TODO: Add function to print tree or verify
+    
+    // Print and verify the constructed tree
+    cout << "Test Case 1:" << endl;
+    cout << "Input - Preorder: [3,9,20,15,7], Inorder: [9,3,15,20,7]" << endl;
+    cout << "Constructed Tree - Preorder: ";
+    printPreorder(root1);
+    cout << endl;
+    cout << "Constructed Tree - Inorder: ";
+    printInorder(root1);
+    cout << endl;
+    cout << "Expected - Preorder: [3,9,20,15,7], Inorder: [9,3,15,20,7]" << endl;
+    cout << "---" << endl;
+    
+    // Test Case 2: preorder = [1,2], inorder = [2,1]
+    vector<int> preorder2 = {1,2};
+    vector<int> inorder2 = {2,1};
+    
+    TreeNode* root2 = sol.buildTree(preorder2, inorder2);
+    
+    cout << "Test Case 2:" << endl;
+    cout << "Input - Preorder: [1,2], Inorder: [2,1]" << endl;
+    cout << "Constructed Tree - Preorder: ";
+    printPreorder(root2);
+    cout << endl;
+    cout << "Constructed Tree - Inorder: ";
+    printInorder(root2);
+    cout << endl;
+    cout << "Expected - Preorder: [1,2], Inorder: [2,1]" << endl;
     
     return 0;
 }
