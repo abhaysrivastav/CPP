@@ -14,7 +14,7 @@ public:
 
             if(nums[mid] == target) return mid;
              
-            if(nums[left] < nums[mid]) // left side is sorted
+            if(nums[left] <= nums[mid]) // left side is sorted
             {
                 if(target >= nums[left] && target <= nums[mid])
                 {
@@ -40,8 +40,14 @@ public:
 int main() {
     Solution sol;
     vector<int> nums = {4,5,6,7,0,1,2};
-    cout << sol.search(nums, 5) << endl;  // Should print 1
-    cout << sol.search(nums, 0) << endl;  // Should print 4
-    cout << sol.search(nums, 3) << endl;  // Should print -1
+    cout << "Test 1 - Index of 5: " << sol.search(nums, 5) << endl;  // Should print 1
+    cout << "Test 1 - Index of 0: " << sol.search(nums, 0) << endl;  // Should print 4
+    cout << "Test 1 - Index of 3: " << sol.search(nums, 3) << endl;  // Should print -1
+    
+    vector<int> nums2 = {1};
+    cout << "Test 2 - Index of 0 in [1]: " << sol.search(nums2, 0) << endl;  // Should print -1
+    
+    vector<int> nums3 = {3,1};
+    cout << "Test 3 - Index of 1 in [3,1]: " << sol.search(nums3, 1) << endl;  // Should print 1
     return 0;
 }
