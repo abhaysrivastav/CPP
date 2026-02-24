@@ -186,3 +186,149 @@ Output: 0 1 2 3 4
 Linear chain: 0 → 1 → 2 → 3 → ... → V
 Depth = V → O(V) stack space
 ```
+
+---
+
+## 10. BFS — Breadth First Search
+
+### Intuition:
+> "Visit all nodes at the current level before going deeper — like ripples in water."
+
+Like a family tree — visit all children first, then all grandchildren.
+
+### DFS vs BFS:
+| | DFS | BFS |
+|---|---|---|
+| Strategy | Go deep first | Level by level |
+| Data structure | Recursion (implicit stack) | Queue (explicit) |
+| Time | O(V + E) | O(V + E) |
+| Space | O(V + E) + call stack | O(V + E) |
+
+---
+
+### BFS Algorithm (pseudocode):
+```
+bfs(start):
+    create visited vector (size V, all false)
+    create queue
+
+    mark start as visited        ← mark BEFORE enqueuing
+    push start to queue
+
+    while queue not empty:
+        node = front of queue
+        pop from queue
+        print node
+
+        for each neighbour of node:
+            if not visited:
+                visited[neighbour] = true   ← mark BEFORE enqueuing
+                push neighbour into queue
+```
+
+### Key insight — mark visited BEFORE pushing:
+```
+❌ Wrong: mark when processing → same node can be added to queue multiple times
+✅ Right: mark when enqueuing  → each node added exactly once
+```
+
+---
+
+### C++ Implementation:
+```cpp
+void bfs(int start) {
+    vector<bool> visited(V, false);
+    queue<int> q;
+
+    visited[start] = true;
+    q.push(start);
+
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+        cout << node << " ";
+
+        for (int neighbour : adj[node]) {
+            if (!visited[neighbour]) {
+                visited[neighbour] = true;
+                q.push(neighbour);
+            }
+        }
+    }
+}
+```
+
+### Queue operations used:
+```cpp
+q.push(x);    // enqueue
+q.front();    // peek front element
+q.pop();      // remove front element
+q.empty();    // check if queue is empty
+```
+
+---
+
+### BFS Trace Example:
+```
+Graph: 0-1, 0-4, 1-2, 1-3, 3-4
+Start: node 0
+
+Queue: [0]          visited: [T,F,F,F,F]
+Dequeue 0, print 0
+  Push 1 → Queue: [1]       visited: [T,T,F,F,F]
+  Push 4 → Queue: [1,4]     visited: [T,T,F,F,T]
+
+Dequeue 1, print 1
+  0 visited, skip
+  Push 2 → Queue: [4,2]     visited: [T,T,T,F,T]
+  Push 3 → Queue: [4,2,3]   visited: [T,T,T,T,T]
+  4 visited, skip
+
+Dequeue 4, print 4
+  0,3 already visited, skip
+
+Dequeue 2, print 2
+  1,3 already visited, skip
+
+Dequeue 3, print 3
+  all neighbours visited, skip
+
+Output: 0 1 4 2 3
+
+Levels:
+  Level 0: 0
+  Level 1: 1, 4    ← neighbours of 0
+  Level 2: 2, 3    ← neighbours of 1 and 4
+```
+
+
+Question 1:
+
+If you call dfs(0, visited) on the graph above, which nodes get visited?
+
+if I will call dfs(0, visited) on the graph , then nodes which are connected to the 0 will get visited 
+
+
+Question 2:
+
+After that DFS finishes, which nodes are still false in visited?
+ nodes 4 , 5 and 6 will be unvisited 
+
+
+Question 3:
+
+What does finding an unvisited node after a DFS tell you?
+dfs will tell that other nodes are not connected to the current source , so that can not be visisted, so we should call dfs to the next unvisited node as source 
+
+
+countComponents():
+    create visited vector
+    count = 0
+
+    for each node 0 to V-1:
+        if node not visited:
+            dfs(node, visited)     ← what two things happen here?
+            count++
+
+    return count
+
