@@ -7,8 +7,8 @@ Legend: [ ] = not started | [~] = in progress | [x] = done
 ----------------------------------------------------------------
 WEEK 1 — DFS on Grids
 ----------------------------------------------------------------
-[x] LC 200  - Number of Islands           (Medium) ← START HERE
-[ ] LC 695  - Max Area of Island          (Medium)
+[x] LC 200  - Number of Islands           (Medium) 
+[x] LC 695  - Max Area of Island          (Medium)
 [ ] LC 417  - Pacific Atlantic Water Flow (Medium)
 
 ----------------------------------------------------------------

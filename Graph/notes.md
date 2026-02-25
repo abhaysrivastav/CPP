@@ -362,3 +362,9 @@ dfs(grid, r, c):
     grid[r][c] = 0        ← mark visited
     dfs in all 4 directions
 
+
+In numIslands your DFS returned void.
+For max area, your DFS needs to return what?
+
+- In each dfs call , I will calculate the area of found island and I will keep track of max area among all the island
+
