@@ -331,4 +331,34 @@ countComponents():
             count++
 
     return count
+    
+
+## 
+
+Q1: What replaces visited[] in a grid? (hint: you can modify the grid itself!)
+
+I think , Instead of visisted  , I should see if the  grid value is 1 
+
+
+Q2: When is a cell a valid starting point for DFS?
+if cell value is 1 
+
+Q3: What are the 4 directions you need to explore from (r, c)?
+
+(r-1, c) , (r+1, c) , (r, c-1), (r, c+1)
+
+numIslands(grid):
+    count = 0
+    for each row r:
+        for each col c:
+            if grid[r][c] == 1:
+                dfs(grid, r, c)
+                count++
+    return count
+
+dfs(grid, r, c):
+    if r or c is out of bounds: return
+    if grid[r][c] == 0: return
+    grid[r][c] = 0        ← mark visited
+    dfs in all 4 directions
 

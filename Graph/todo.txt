@@ -1,0 +1,49 @@
+================================================================
+  GRAPH PROBLEMS — Interview Prep (Google / Microsoft)
+================================================================
+
+Legend: [ ] = not started | [~] = in progress | [x] = done
+
+----------------------------------------------------------------
+WEEK 1 — DFS on Grids
+----------------------------------------------------------------
+[x] LC 200  - Number of Islands           (Medium) ← START HERE
+[ ] LC 695  - Max Area of Island          (Medium)
+[ ] LC 417  - Pacific Atlantic Water Flow (Medium)
+
+----------------------------------------------------------------
+WEEK 2 — Cycle Detection + Topological Sort
+----------------------------------------------------------------
+[ ] LC 207  - Course Schedule             (Medium)
+[ ] LC 210  - Course Schedule II          (Medium)
+[ ] LC 261  - Graph Valid Tree            (Medium)
+
+----------------------------------------------------------------
+WEEK 3 — BFS + Hard
+----------------------------------------------------------------
+[ ] LC 994  - Rotting Oranges             (Medium)
+[ ] LC 127  - Word Ladder                 (Hard)
+[ ] LC 827  - Making a Large Island       (Hard) ← Asked at Google
+
+----------------------------------------------------------------
+BONUS — Connected Components + Union Find
+----------------------------------------------------------------
+[ ] LC 323  - Number of Connected Components (Medium)
+[ ] LC 684  - Redundant Connection           (Medium)
+[ ] LC 133  - Clone Graph                    (Medium)
+[ ] LC 79   - Word Search                    (Medium)
+[ ] LC 1091 - Shortest Path in Binary Matrix (Medium)
+[ ] LC 286  - Walls and Gates                (Medium)
+
+================================================================
+  CONCEPTS COMPLETED
+================================================================
+[x] Adjacency List Representation
+[x] DFS (recursive)
+[x] BFS (queue-based)
+[x] Connected Components (count using DFS)
+[ ] Cycle Detection (DFS)
+[ ] Topological Sort
+[ ] Shortest Path (BFS / Dijkstra)
+[ ] Union-Find (Disjoint Set)
+================================================================
