@@ -9,7 +9,7 @@ WEEK 1 — DFS on Grids
 ----------------------------------------------------------------
 [x] LC 200  - Number of Islands           (Medium) 
 [x] LC 695  - Max Area of Island          (Medium)
-[ ] LC 417  - Pacific Atlantic Water Flow (Medium)
+[x] LC 417  - Pacific Atlantic Water Flow (Medium)
 
 ----------------------------------------------------------------
 WEEK 2 — Cycle Detection + Topological Sort
