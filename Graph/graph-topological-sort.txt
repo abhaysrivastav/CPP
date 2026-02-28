@@ -1,0 +1,94 @@
+
+
+# It should be directed acyclic graph (DAG)
+    - Always process the nodes that have no remaining dependencies 
+
+1. Compute the in-degree of every node 
+2. Enqueue all nodes with in-degree 0
+3. While queue is not empty:
+    a. Dequeue the node u ---> add to the result
+    b. For each neighbor v of u :
+        decrement indegree[v]
+        if indegree[v] == 0 enqueue 
+
+    
+4. If the result has n nodes -> valid DAG + topological order 
+    else -> Cycle exist 
+
+
+
+===============================================================
+INTERVIEW NOTES - Topological Sort
+===============================================================
+
+--- MUST KNOW FACTS ---
+
+1. Only works on DAG (Directed Acyclic Graph)
+   - If a cycle exists, topological order is IMPOSSIBLE
+   - Always mention this constraint upfront in interviews
+
+2. Two standard algorithms:
+   - Kahn's Algorithm (BFS, uses in-degree)    <- iterative, easy cycle detection
+   - DFS-based (post-order, push to stack)     <- recursive, cycle via visited states
+
+3. Cycle detection is built into Kahn's:
+   - If result.size() != n  ->  cycle exists
+   - No need for a separate cycle-detection pass
+
+4. Multiple valid topological orders can exist for the same graph
+   - Never assume a unique answer
+
+5. Complexity: O(V + E) time,  O(V + E) space  - always mention this
+
+--- COMMON INTERVIEW PATTERNS (when to use topo sort) ---
+
+- Course Schedule (LC 207, 210)       -> nodes = courses, edges = prerequisites
+- Task scheduling with dependencies   -> same pattern
+- Build order of packages/modules     -> same pattern
+- Alien Dictionary (LC 269)           -> derive edges from char order, then topo sort
+- Minimum time to finish all jobs     -> topo sort + DP on DAG
+
+--- KEY DECISION: Kahn's vs DFS ---
+
+  Use Kahn's when:
+  - You need to detect a cycle easily
+  - You want an iterative solution
+  - Problem asks for BFS-level ordering (e.g., earliest completion time)
+
+  Use DFS when:
+  - Already doing DFS traversal for another reason
+  - Recursive style is more natural for the problem
+
+--- EDGE CASES TO ALWAYS MENTION ---
+
+- Graph with no edges      -> any order works
+- Disconnected graph       -> Kahn's handles it naturally (multiple 0 in-degree seeds)
+- Single node              -> trivially valid
+- Graph with a cycle       -> return [] or -1 depending on problem
+- Self-loop (A -> A)       -> in-degree of A is 1, never reaches 0 -> cycle detected
+
+--- QUICK TEMPLATE ---
+
+  vector<int> topoSort(int n, vector<vector<int>>& edges) {
+      vector<int> indegree(n, 0);
+      vector<vector<int>> adj(n);
+      for (auto& e : edges) { adj[e[0]].push_back(e[1]); indegree[e[1]]++; }
+
+      queue<int> q;
+      for (int i = 0; i < n; i++) if (indegree[i] == 0) q.push(i);
+
+      vector<int> res;
+      while (!q.empty()) {
+          int u = q.front(); q.pop();
+          res.push_back(u);
+          for (int v : adj[u]) if (--indegree[v] == 0) q.push(v);
+      }
+      return res.size() == n ? res : {};  // {} means cycle detected
+  }
+
+  - Mentioning DAG constraint immediately
+  - Explaining in-degree intuition before coding
+  - Cycle detection in the same pass (not separate)
+  - Correct O(V+E) time/space complexity
+  - Handling disconnected graphs
+  - Recognizing the pattern in disguised problems (e.g., Alien Dictionary)
