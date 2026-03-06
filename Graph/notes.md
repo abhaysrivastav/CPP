@@ -368,3 +368,33 @@ For max area, your DFS needs to return what?
 
 - In each dfs call , I will calculate the area of found island and I will keep track of max area among all the island
 
+Answer these 3 questions before coding 🎯
+Q1: Pacific starts from which border cells?
+Pacific starts with row=0 and column= 0 to no of cols
+and col=0 and row=0 to no of rows
+
+Q2: Atlantic starts from which border cells?
+Atlantic starts for row=n-1 col=0 to number of cols -1
+and for col=n-1 , row = 0 to number of rows -1
+
+
+Q3: Normal flow goes to lower/equal neighbors.
+Reversed flow (ocean climbing up) goes to increasing or equal neighbors?
+--------------------------------------------------------------------------
+
+pacificAtlantic(heights):
+    create pacific[R][C]  = false
+    create atlantic[R][C] = false
+
+    // seed Pacific DFS from top row + left col
+    for c in 0..C: dfs(0, c, pacific, heights)
+    for r in 0..R: dfs(r, 0, pacific, heights)
+
+    // seed Atlantic DFS from bottom row + right columns
+    for c in 0..C: dfs(R-1, c, atlantic, heights)
+    for r in 0..R: dfs(r, C-1 , atlantic, heights)
+
+    // collect result
+    for each cell (r,c):
+        if pacific[r][c] AND atlantic[r][c]:
+            add (r,c) to result

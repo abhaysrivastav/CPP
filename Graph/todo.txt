@@ -14,7 +14,7 @@ WEEK 1 — DFS on Grids
 ----------------------------------------------------------------
 WEEK 2 — Cycle Detection + Topological Sort
 ----------------------------------------------------------------
-[ ] LC 207  - Course Schedule             (Medium)
+[x] LC 207  - Course Schedule             (Medium)
 [ ] LC 210  - Course Schedule II          (Medium)
 [ ] LC 261  - Graph Valid Tree            (Medium)
 
